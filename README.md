@@ -6,12 +6,15 @@ A planned suite of small team-ritual tools, such as retrospectives and decision 
 
 This repository holds early prototypes. There is no build step, backend, or login yet.
 
-| Tool | Location | Notes |
+| Page | File | Notes |
 | --- | --- | --- |
-| Purchase voting | `index.html`, `js/`, `css/` | Vanilla JavaScript. Styled with Tailwind and Flowbite classes. Saves to the browser's `localStorage`. |
-| Retro board | `Retro board (Flowbite style).html` | A single static mockup in the style of EasyRetro. |
+| Entry page | `index.html` | Lists every tool as a card, available or coming soon. |
+| Retro board | `retro.html` | A static mockup in the style of EasyRetro. |
+| Purchase voting | `voting.html`, `js/voting/` | Vanilla JavaScript. Saves to the browser's `localStorage`. |
 
-Both tools load Tailwind from a CDN and share the same navigation bar and visual style.
+Shared code: `js/site.js` holds the tool list and the header used by every page, and `css/app.css` holds the few styles Tailwind cannot express. All pages load Tailwind from a CDN.
+
+To add a tool, add an entry to the `TOOLS` list in `js/site.js` and create its page.
 
 ## Run with hot reload
 
@@ -23,7 +26,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:8000. The page reloads whenever a file changes. The retro board is at `/Retro%20board%20(Flowbite%20style).html`.
+Then open http://localhost:8000. The page reloads whenever a file changes. The pages are `/`, `/retro.html`, and `/voting.html`.
 
 ## Decisions so far
 
