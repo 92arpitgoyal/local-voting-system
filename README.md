@@ -1,6 +1,6 @@
 # TeamRituals (working name)
 
-A planned suite of small team-ritual tools, such as retrospectives and decision voting, available under one login. The product name is not final.
+A planned suite of small team-ritual tools, such as retrospectives and decision voting, available under one login. The larger goal is to become the memory of how a team works: decisions, lessons, and commitments that accumulate over time. The product name is not final.
 
 ## Current state
 
