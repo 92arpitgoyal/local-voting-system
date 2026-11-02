@@ -1,6 +1,6 @@
-# TeamRituals (working name)
+# Team-Echo
 
-A planned suite of small team-ritual tools, such as retrospectives and decision voting, available under one login. The larger goal is to become the memory of how a team works: decisions, lessons, and commitments that accumulate over time. The product name is not final.
+A planned suite of small team-ritual tools, such as retrospectives and decision voting, available under one login. The larger goal is to become the memory of how a team works: decisions, lessons, and commitments that accumulate over time. The product name is Team-Echo, with a logo of echo arcs; domain availability is not yet checked.
 
 ## Current state
 
@@ -13,13 +13,17 @@ This repository holds early prototypes. There is no build step, backend, or logi
 
 Both tools load Tailwind from a CDN and share the same navigation bar and visual style.
 
-## Run the voting app
+## Run with hot reload
 
 ```bash
-python3 -m http.server 8000
+npm install
 ```
 
-Then open http://localhost:8000.
+```bash
+npm run dev
+```
+
+Then open http://localhost:8000. The page reloads whenever a file changes. The retro board is at `/Retro%20board%20(Flowbite%20style).html`.
 
 ## Decisions so far
 

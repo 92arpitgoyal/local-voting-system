@@ -84,7 +84,7 @@ Undecided: framework, sign-in, database, real-time sync, hosting.
 
 ## Name and domain
 
-Undecided. "TeamRituals" is a placeholder.
+Name chosen: Team-Echo. The logo is a dot with three echo arcs. Domain and trademark availability are not yet checked.
 
 ## Roadmap
 
