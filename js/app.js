@@ -4,6 +4,7 @@ function render() {
   if (!live) inSetup = false;
   const hb = document.getElementById("setupBtn");
   hb.hidden = !live;
+  hb.className = inSetup ? PRIMARY + " inline-flex items-center gap-2" : BTN + " inline-flex items-center gap-2";
   hb.innerHTML = inSetup ? "Done" : `${GEAR} Setup`;
   document.getElementById("sub").textContent = inSetup
     ? "Choose which products people vote on and how votes are limited."

@@ -1,42 +1,45 @@
 // Home, voting and results screens.
 function homeView() {
-  return `<div class="card">
-    <h3>Next voter</h3>
-    <div class="row"><input type="text" id="newName" placeholder="Enter your name" maxlength="30">
-    <button class="primary" id="startBtn">Start voting</button></div>
+  return `<div class="${CARD}">
+    <h3 class="text-lg font-semibold mb-3">Next voter</h3>
+    <div class="flex gap-2"><input type="text" id="newName" class="${INPUT} flex-1 min-w-0" placeholder="Enter your name" maxlength="30">
+    <button class="${PRIMARY}" id="startBtn">Start voting</button></div>
   </div>
-  <div class="card"><h3>Submitted voters (${state.players.length})</h3>
-    ${state.players.map((p, i) => `<div class="voter">${avatar(p.name, i)}<div class="grow"><b>${esc(p.name)}</b></div><span class="muted">${usedText(p)}</span></div>`).join("")
-      || '<div class="muted">No votes have been submitted yet.</div>'}
+  <div class="${CARD}"><h3 class="text-lg font-semibold mb-2">Submitted voters (${state.players.length})</h3>
+    <ul class="divide-y divide-gray-200 dark:divide-gray-700">${state.players.map((p, i) => `<li class="flex items-center gap-3 py-2.5">${avatar(p.name, i)}<div class="flex-1 min-w-0 font-medium truncate">${esc(p.name)}</div><span class="${MUTED}">${usedText(p)}</span></li>`).join("")
+      || `<li class="${MUTED} py-2">No votes have been submitted yet.</li>`}</ul>
   </div>
-  <div class="row between bar">
-    <button id="resetBtn">Start over</button>
-    <button class="primary" id="finishBtn" ${state.players.length ? "" : "disabled"}>Finish and show results</button></div>`;
+  <div class="${BAR}">
+    <button class="${BTN}" id="resetBtn">Start over</button>
+    <button class="${PRIMARY}" id="finishBtn" ${state.players.length ? "" : "disabled"}>Finish and show results</button></div>`;
 }
 
 function votingView() {
   const d = state.draft;
   const spent = used(d), left = TOTAL_CAP - spent;
   const unlimited = TOTAL_CAP === Infinity;
-  return `<div class="budget">
-      <div class="row between"><span>Voting as <b>${esc(d.name)}</b></span>
-      <span class="left">${unlimited ? `<b>${spent}</b> votes used` : `<b class="${left === 0 ? "warn" : ""}">${left}</b> of ${TOTAL_CAP} votes left`}</span></div>
-      ${unlimited ? "" : `<div class="meter"><div style="width:${spent / TOTAL_CAP * 100}%"></div></div>`}</div>
-    <div class="row order"><span class="muted">Order:</span><button id="shuffleBtn"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Random order</button><button id="alphaBtn" aria-label="Sort alphabetically, A to Z">A <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Z</button></div>
-    <div class="grid">${(d.order && d.order.length === NAMES.length ? d.order : NAMES).map(name => {
+  const arrow = '<svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const shuffle = '<svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>';
+  return `<div class="budget sticky top-3 z-10 ${CARD}">
+      <div class="flex items-center justify-between text-sm"><span>Voting as <b>${esc(d.name)}</b></span>
+      <span class="left">${unlimited ? `<b>${spent}</b> votes used` : `<b class="${left === 0 ? "text-red-600 dark:text-red-400" : ""}">${left}</b> of ${TOTAL_CAP} votes left`}</span></div>
+      ${unlimited ? "" : `<div class="mt-2.5">${PROGRESS(spent / TOTAL_CAP * 100)}</div>`}</div>
+    <div class="flex items-center gap-2 mb-3"><span class="${MUTED}">Order:</span><button class="${BTN_SM}" id="shuffleBtn">${shuffle} Random order</button><button class="${BTN_SM}" id="alphaBtn" aria-label="Sort alphabetically, A to Z">A ${arrow} Z</button></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${(d.order && d.order.length === NAMES.length ? d.order : NAMES).map(name => {
       const v = d.votes[name] || 0;
-      return `<div class="tile ${v ? "on" : ""}" data-tile="${esc(name)}"><div class="emoji">${ICON[name]}</div>
-        <div class="grow"><div class="name">${esc(name)}</div>
-          <div class="pips">${Array.from({ length: maxFor(name) }, (_, i) => i + 1).map(n => `<div class="pip ${n <= v ? "f" : ""}"></div>`).join("")}</div></div>
-        <div class="stepper">
-          <button data-vote="${esc(name)}" data-d="-1" ${v === 0 ? "disabled" : ""} aria-label="Remove a vote from ${esc(name)}">−</button>
-          <span>${v}</span>
-          <button data-vote="${esc(name)}" data-d="1" ${v >= maxFor(name) ? "disabled" : ""} class="${left === 0 ? "dim" : ""}" aria-label="Add a vote to ${esc(name)}">+</button>
+      const tone = v ? "border-blue-600 ring-1 ring-blue-600 bg-blue-50 dark:bg-gray-700" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800";
+      return `<div class="p-3 border rounded-lg shadow-sm flex items-center gap-3 cursor-pointer select-none ${tone}" data-tile="${esc(name)}"><div class="${ICONBOX}">${ICON[name]}</div>
+        <div class="flex-1 min-w-0"><div class="font-medium truncate">${esc(name)}</div>
+          <div class="flex gap-1 mt-1.5">${Array.from({ length: maxFor(name) }, (_, i) => i + 1).map(n => `<div class="w-3 h-3 rounded-full ${n <= v ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"}"></div>`).join("")}</div></div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button class="${BTN_ROUND}" data-vote="${esc(name)}" data-d="-1" ${v === 0 ? "disabled" : ""} aria-label="Remove a vote from ${esc(name)}">−</button>
+          <span class="w-5 text-center font-bold tabular-nums">${v}</span>
+          <button class="${BTN_ROUND} ${left === 0 ? "opacity-40" : ""}" data-vote="${esc(name)}" data-d="1" ${v >= maxFor(name) ? "disabled" : ""} aria-label="Add a vote to ${esc(name)}">+</button>
         </div></div>`;
     }).join("")}</div>
-    <div class="row between bar">
-      <button id="cancelBtn">Discard and go back</button>
-      <button class="primary" id="submitBtn">Submit my votes</button></div>`;
+    <div class="${BAR}">
+      <button class="${BTN}" id="cancelBtn">Discard and go back</button>
+      <button class="${PRIMARY}" id="submitBtn">Submit my votes</button></div>`;
 }
 
 function resultsView() {
@@ -47,37 +50,38 @@ function resultsView() {
 
   const voted = totals.filter(t => t.total > 0), unvoted = totals.filter(t => !t.total);
   const top = voted.slice(0, 3);
-  let h = `<h2>Combined results</h2>`;
-  if (!top.length) h += `<div class="card muted">No votes were cast.</div>`;
-  else h += `<div class="podium">${top.map((t, k) => `
-    <div class="place p${k + 1}"><div class="medal">${medals[k]}</div><div class="emoji">${ICON[t.name]}</div>
-      <div class="name">${esc(t.name)}</div><div class="score">${t.total}</div></div>`).join("")}</div>`;
+  let h = `<h2 class="${H2} mt-0">Combined results</h2>`;
+  if (!top.length) h += `<div class="${CARD} ${MUTED}">No votes were cast.</div>`;
+  else h += `<div class="grid grid-cols-3 gap-3 mb-4">${top.map((t, k) => `
+    <div class="p-3 text-center border rounded-lg shadow-sm ${k === 0 ? "border-blue-600 ring-1 ring-blue-600 bg-blue-50 dark:bg-gray-700" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"}">
+      <div class="text-xs font-semibold uppercase tracking-wide ${k === 0 ? "text-blue-700 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"}">${medals[k]}</div>
+      <div class="${ICONBOX} mx-auto my-2">${ICON[t.name]}</div>
+      <div class="font-medium text-sm truncate">${esc(t.name)}</div><div class="text-2xl font-extrabold text-blue-700 dark:text-blue-400">${t.total}</div></div>`).join("")}</div>`;
 
-  if (voted.length) h += `<div class="card">${voted.map((t, i) =>
-    `<div class="result"><span class="rank">${i + 1}</span><span class="emoji" style="width:34px;height:34px;border-radius:9px">${ICON[t.name]}</span>
-      <div>${esc(t.name)}<div class="track"><div class="fill" style="width:${t.total / max * 100}%"></div></div></div>
-      <span class="num">${t.total}</span></div>`).join("")}</div>`;
+  if (voted.length) h += `<div class="${CARD}">${voted.map((t, i) =>
+    `<div class="grid grid-cols-[1.5rem_2.5rem_1fr_2rem] gap-2.5 items-center py-1.5"><span class="text-center font-medium ${MUTED}">${i + 1}</span><span class="${ICONBOX}">${ICON[t.name]}</span>
+      <div class="min-w-0"><div class="text-sm font-medium truncate mb-1">${esc(t.name)}</div>${PROGRESS(t.total / max * 100)}</div>
+      <span class="text-right font-bold tabular-nums">${t.total}</span></div>`).join("")}</div>`;
 
-
-  h += `<h2>Results by voter</h2>`;
+  h += `<h2 class="${H2}">Results by voter</h2>`;
   h += state.players.map((p, i) => {
     const all = NAMES.filter(n => p.votes[n]).sort((a, b) => p.votes[b] - p.votes[a] || a.localeCompare(b));
     const picks = all.slice(0, 5);
-    return `<div class="card"><div class="voter" style="padding-top:0">${avatar(p.name, i)}
-      <div class="grow"><b>${esc(p.name)}</b></div><span class="muted">${usedText(p)}</span></div>
-      ${picks.length ? picks.map(n => `<span class="chip">${ICON[n]} ${esc(n)} <b>${p.votes[n]}</b></span>`).join("") : '<div class="muted">No votes cast.</div>'}
-      ${all.length > 5 ? `<div class="muted more">Top 5 of ${all.length} products shown. See the full table for the rest.</div>` : ""}</div>`;
+    return `<div class="${CARD}"><div class="flex items-center gap-3 mb-3">${avatar(p.name, i)}
+      <div class="flex-1 min-w-0 font-medium truncate">${esc(p.name)}</div><span class="${MUTED}">${usedText(p)}</span></div>
+      <div class="flex flex-wrap gap-2">${picks.length ? picks.map(n => `<span class="${BADGE}">${ICON[n]} ${esc(n)} <b>${p.votes[n]}</b></span>`).join("") : `<div class="${MUTED}">No votes cast.</div>`}</div>
+      ${all.length > 5 ? `<div class="${MUTED} mt-3">Top 5 of ${all.length} products shown. See the full table for the rest.</div>` : ""}</div>`;
   }).join("");
 
-  const row = t => `<tr><td>${esc(t.name)}</td>${state.players.map(p => { const v = p.votes[t.name] || 0; return `<td class="${v ? "" : "zero"}">${v}</td>`; }).join("")}<td><b>${t.total}</b></td></tr>`;
+  const cell = "px-4 py-2.5 text-center whitespace-nowrap";
+  const row = t => `<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"><td class="${cell} !text-left font-medium text-gray-900 dark:text-white">${esc(t.name)}</td>${state.players.map(p => { const v = p.votes[t.name] || 0; return `<td class="${cell} ${v ? "" : "opacity-40"}">${v}</td>`; }).join("")}<td class="${cell} font-bold text-gray-900 dark:text-white">${t.total}</td></tr>`;
   const cols = state.players.length + 2;
-  h += `<h2>Full table</h2><div class="card scroll"><table><thead><tr><th>Product</th>${state.players.map(p => `<th>${esc(p.name)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${
+  h += `<h2 class="${H2}">Full table</h2><div class="relative overflow-x-auto border border-gray-200 rounded-lg shadow-sm dark:border-gray-700"><table class="w-full text-sm text-gray-500 dark:text-gray-400"><thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th class="${cell} !text-left">Product</th>${state.players.map(p => `<th class="${cell}">${esc(p.name)}</th>`).join("")}<th class="${cell}">Total</th></tr></thead><tbody>${
     voted.map(row).join("")}${
-    unvoted.length ? `<tr class="toggle" id="toggleRow"><td colspan="${cols}">${showUnvoted ? "▾" : "▸"} Not voted for by anyone (${unvoted.length})</td></tr>${showUnvoted ? unvoted.map(row).join("") : ""}` : ""
+    unvoted.length ? `<tr class="cursor-pointer bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 border-b dark:border-gray-700" id="toggleRow"><td colspan="${cols}" class="px-4 py-2.5 font-medium text-gray-900 dark:text-white">${showUnvoted ? "▾" : "▸"} Not voted for by anyone (${unvoted.length})</td></tr>${showUnvoted ? unvoted.map(row).join("") : ""}` : ""
   }</tbody></table></div>`;
 
-  h += `<div class="row between bar">
-    <button id="backBtn">Back to voter list</button><button id="resetBtn">Start over</button></div>`;
+  h += `<div class="${BAR}">
+    <button class="${BTN}" id="backBtn">Back to voter list</button><button class="${BTN}" id="resetBtn">Start over</button></div>`;
   return h;
 }
-

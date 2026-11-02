@@ -2,38 +2,42 @@
 // A number box with decrease and increase buttons.
 function stepper(id, value, min, max, off, label) {
   const d = off ? "disabled" : "";
-  return `<span class="numstep"><button type="button" data-step="${id}" data-d="-1" aria-label="Decrease ${label}" ${d || value <= min ? "disabled" : ""}>−</button>
-    <input type="number" id="${id}" min="${min}" max="${max}" value="${value}" aria-label="${label}" ${d}>
-    <button type="button" data-step="${id}" data-d="1" aria-label="Increase ${label}" ${d || value >= max ? "disabled" : ""}>+</button></span>`;
+  return `<span class="inline-flex items-center gap-1.5"><button type="button" class="${BTN_ROUND}" data-step="${id}" data-d="-1" aria-label="Decrease ${label}" ${d || value <= min ? "disabled" : ""}>−</button>
+    <input type="number" id="${id}" class="${INPUT} w-16 !p-2 text-center" min="${min}" max="${max}" value="${value}" aria-label="${label}" ${d}>
+    <button type="button" class="${BTN_ROUND}" data-step="${id}" data-d="1" aria-label="Increase ${label}" ${d || value >= max ? "disabled" : ""}>+</button></span>`;
 }
 
 function setupView() {
   const c = state.config, locked = state.players.length > 0, dis = locked ? "disabled" : "";
-  return `<div class="card">
-    ${locked ? '<p class="muted">Products and limits are locked because votes have already been submitted. Use Start over on the home page to change them.</p>' : ""}
-    <div class="addbox"><div class="label">Add products</div>
-      <div class="addhint">Type one name, or several separated by commas.</div>
-      <div class="prow"><button class="emoji iconpick" id="newIconBtn" aria-label="Choose an icon for the new products" ${dis}>${svg(PATHS[newIcon])}<span class="edit">${PENCIL}</span></button>
-        <input type="text" id="newProduct" placeholder="e.g. Laptop, Bicycle, Fridge" maxlength="400" ${dis}></div>
-      <button class="primary addbtn" id="addProduct" ${dis}>Add product</button>
-      <div class="warn">${esc(setupMsg)}</div></div>
-    <h3 class="listhead">Products (${NAMES.length})</h3>
-    ${NAMES.map((n, i) => `<div class="prow"><button class="emoji iconpick" data-icon="${i}" aria-label="Change icon for ${esc(n)}" ${dis}>${ICON[n]}<span class="edit">${PENCIL}</span></button>
-      <input type="text" data-rename="${i}" value="${esc(n)}" maxlength="40" aria-label="Product name" ${dis}>
-      <button data-remove="${i}" aria-label="Remove ${esc(n)}" ${locked || NAMES.length <= 2 ? "disabled" : ""}>Remove</button></div>`).join("")}
+  const edit = `<span class="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-blue-700 text-white flex items-center justify-center border-2 border-white dark:border-gray-800"><span class="w-2 h-2 block [&>svg]:w-full [&>svg]:h-full">${PENCIL}</span></span>`;
+  const iconBtn = (attrs, label, icon) => `<button class="${ICONBOX} relative hover:ring-2 hover:ring-blue-500 disabled:opacity-50" ${attrs} aria-label="${label}" ${dis}>${icon}${edit}</button>`;
+  const radio = "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 shrink-0";
+  const opt = "flex items-center gap-2.5 py-1.5 min-h-10 cursor-pointer";
+  return `<div class="${CARD}">
+    ${locked ? `<p class="${MUTED} mb-3">Products and limits are locked because votes have already been submitted. Use Start over on the home page to change them.</p>` : ""}
+    <div class="p-4 mb-5 rounded-lg bg-blue-50 dark:bg-gray-900"><div class="font-semibold text-blue-800 dark:text-blue-400">Add products</div>
+      <div class="${MUTED} mb-3">Type one name, or several separated by commas.</div>
+      <div class="flex items-center gap-2">${iconBtn('id="newIconBtn"', "Choose an icon for the new products", svg(PATHS[newIcon]))}
+        <input type="text" id="newProduct" class="${INPUT} flex-1 min-w-0" placeholder="e.g. Laptop, Bicycle, Fridge" maxlength="400" ${dis}></div>
+      <button class="${PRIMARY} w-full mt-3" id="addProduct" ${dis}>Add product</button>
+      <div class="text-sm text-red-600 dark:text-red-400 mt-2 empty:hidden">${esc(setupMsg)}</div></div>
+    <h3 class="text-lg font-semibold mb-2">Products (${NAMES.length})</h3>
+    <div class="space-y-2">${NAMES.map((n, i) => `<div class="flex items-center gap-2">${iconBtn(`data-icon="${i}"`, "Change icon for " + esc(n), ICON[n])}
+      <input type="text" class="${INPUT} flex-1 min-w-0" data-rename="${i}" value="${esc(n)}" maxlength="40" aria-label="Product name" ${dis}>
+      <button class="${BTN_SM} !py-2.5" data-remove="${i}" aria-label="Remove ${esc(n)}" ${locked || NAMES.length <= 2 ? "disabled" : ""}>Remove</button></div>`).join("")}</div>
   </div>
-  <div class="card tight"><h3>Votes for each product</h3>
-    <label class="field"><span>Maximum per product</span>
+  <div class="${CARD}"><h3 class="text-lg font-semibold mb-2">Votes for each product</h3>
+    <label class="flex items-center gap-3 text-sm"><span>Maximum per product</span>
       ${stepper("maxVotes", c.max, 1, 10, locked, "Maximum votes per product")}</label>
   </div>
-  <div class="card tight"><h3>Total votes for each voter</h3>
-    <label class="opt"><input type="radio" name="totalMode" value="auto" ${c.totalMode === "auto" ? "checked" : ""} ${dis}><span>Equal to the number of products (${NAMES.length})</span></label>
-    <label class="opt"><input type="radio" name="totalMode" value="custom" ${c.totalMode === "custom" ? "checked" : ""} ${dis}><span>A fixed number</span>
+  <div class="${CARD}"><h3 class="text-lg font-semibold mb-2">Total votes for each voter</h3>
+    <label class="${opt}"><input type="radio" class="${radio}" name="totalMode" value="auto" ${c.totalMode === "auto" ? "checked" : ""} ${dis}><span class="text-sm">Equal to the number of products (${NAMES.length})</span></label>
+    <label class="${opt}"><input type="radio" class="${radio}" name="totalMode" value="custom" ${c.totalMode === "custom" ? "checked" : ""} ${dis}><span class="text-sm">A fixed number</span>
       ${stepper("totalVotes", totalError || Math.min(c.total, maxSpendable(c)), 1, 500, c.totalMode !== "custom" || locked, "Total votes per voter")}</label>
-    <label class="opt"><input type="radio" name="totalMode" value="none" ${c.totalMode === "none" ? "checked" : ""} ${dis}><span>No limit on the total</span></label>
+    <label class="${opt}"><input type="radio" class="${radio}" name="totalMode" value="none" ${c.totalMode === "none" ? "checked" : ""} ${dis}><span class="text-sm">No limit on the total</span></label>
   </div>
   ${totalError ? totalErrorView() : ""}
-  <div class="row between bar"><button id="resetDefaults" ${dis}>Restore defaults</button><button class="primary" id="doneBtn">Done</button></div>`;
+  <div class="${BAR}"><button class="${BTN}" id="resetDefaults" ${dis}>Restore defaults</button><button class="${PRIMARY}" id="doneBtn">Done</button></div>`;
 }
 
 function saveConfig(msg = "", overTotal = 0) {
@@ -48,13 +52,13 @@ function totalErrorView() {
   const c = state.config, req = totalError, top = maxSpendable(c);
   const need = Math.ceil(req / NAMES.length);
   const raise = need <= 10
-    ? `<button data-fix="max">Raise the maximum per product to ${need}</button>`
+    ? `<button class="${BTN_SM}" data-fix="max">Raise the maximum per product to ${need}</button>`
     : `<span>Even the highest maximum per product (10) allows only ${NAMES.length * 10} votes in total.</span>`;
-  return `<div class="errbox" role="alert">
-    <div class="errtitle">A total of ${req} votes is too high.</div>
+  return `<div class="p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800 space-y-1" role="alert">
+    <div class="font-semibold">A total of ${req} votes is too high.</div>
     <div>A voter can spend at most ${top} votes: ${NAMES.length} products with up to ${c.max === 1 ? "1 vote" : c.max + " votes"} each.</div>
-    <div class="errfix">To fix this, either:</div>
-    <div class="errbtns"><button data-fix="total">Lower the total to ${top}</button>${raise}</div></div>`;
+    <div class="pt-1">To fix this, either:</div>
+    <div class="flex flex-wrap items-center gap-2"><button class="${BTN_SM}" data-fix="total">Lower the total to ${top}</button>${raise}</div></div>`;
 }
 function validName(name, except) {
   name = name.trim();
