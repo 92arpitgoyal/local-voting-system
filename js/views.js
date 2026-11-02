@@ -61,10 +61,12 @@ function resultsView() {
 
   h += `<h2>Results by voter</h2>`;
   h += state.players.map((p, i) => {
-    const picks = NAMES.filter(n => p.votes[n]).sort((a, b) => p.votes[b] - p.votes[a]);
+    const all = NAMES.filter(n => p.votes[n]).sort((a, b) => p.votes[b] - p.votes[a] || a.localeCompare(b));
+    const picks = all.slice(0, 5);
     return `<div class="card"><div class="voter" style="padding-top:0">${avatar(p.name, i)}
       <div class="grow"><b>${esc(p.name)}</b></div><span class="muted">${usedText(p)}</span></div>
-      ${picks.length ? picks.map(n => `<span class="chip">${ICON[n]} ${esc(n)} <b>${p.votes[n]}</b></span>`).join("") : '<div class="muted">No votes cast.</div>'}</div>`;
+      ${picks.length ? picks.map(n => `<span class="chip">${ICON[n]} ${esc(n)} <b>${p.votes[n]}</b></span>`).join("") : '<div class="muted">No votes cast.</div>'}
+      ${all.length > 5 ? `<div class="muted more">Top 5 of ${all.length} products shown. See the full table for the rest.</div>` : ""}</div>`;
   }).join("");
 
   const row = t => `<tr><td>${esc(t.name)}</td>${state.players.map(p => { const v = p.votes[t.name] || 0; return `<td class="${v ? "" : "zero"}">${v}</td>`; }).join("")}<td><b>${t.total}</b></td></tr>`;

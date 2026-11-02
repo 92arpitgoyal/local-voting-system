@@ -5,11 +5,13 @@ const maxFor = () => state.config.max;
 const usedText = p => TOTAL_CAP === Infinity ? `${used(p)} votes used` : `${used(p)} of ${TOTAL_CAP} votes used`;
 const ruleText = () => `Give each product 0 to ${MAX_PER_PRODUCT} votes` +
   (TOTAL_CAP === Infinity ? ", with no limit on total votes." : `, with ${TOTAL_CAP} votes to spend in total.`);
+// The most votes one voter can actually spend: every product at its maximum.
+const maxSpendable = c => c.products.length * c.max;
 function applyConfig() {
   const c = state.config;
   NAMES = c.products;
   MAX_PER_PRODUCT = c.max;
-  TOTAL_CAP = c.totalMode === "none" ? Infinity : c.totalMode === "custom" ? c.total : NAMES.length;
+  TOTAL_CAP = c.totalMode === "none" ? Infinity : c.totalMode === "custom" ? Math.min(c.total, maxSpendable(c)) : NAMES.length;
 }
 const KEY = "purchase-voting-v1";
 
@@ -18,6 +20,7 @@ let showUnvoted = false;
 let inSetup = false;
 let setupMsg = "";
 let newIcon = "Box";
+let totalError = 0; // the too-high total the voter asked for, or 0
 
 let state = load();
 applyConfig();

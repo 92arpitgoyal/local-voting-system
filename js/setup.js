@@ -29,15 +29,32 @@ function setupView() {
   <div class="card tight"><h3>Total votes for each voter</h3>
     <label class="opt"><input type="radio" name="totalMode" value="auto" ${c.totalMode === "auto" ? "checked" : ""} ${dis}><span>Equal to the number of products (${NAMES.length})</span></label>
     <label class="opt"><input type="radio" name="totalMode" value="custom" ${c.totalMode === "custom" ? "checked" : ""} ${dis}><span>A fixed number</span>
-      ${stepper("totalVotes", c.total, 1, 500, c.totalMode !== "custom" || locked, "Total votes per voter")}</label>
+      ${stepper("totalVotes", totalError || Math.min(c.total, maxSpendable(c)), 1, 500, c.totalMode !== "custom" || locked, "Total votes per voter")}</label>
     <label class="opt"><input type="radio" name="totalMode" value="none" ${c.totalMode === "none" ? "checked" : ""} ${dis}><span>No limit on the total</span></label>
   </div>
+  ${totalError ? totalErrorView() : ""}
   <div class="row between bar"><button id="resetDefaults" ${dis}>Restore defaults</button><button class="primary" id="doneBtn">Done</button></div>`;
 }
 
-function saveConfig(msg = "") {
+function saveConfig(msg = "", overTotal = 0) {
   setupMsg = msg;
+  totalError = overTotal;
+  const top = maxSpendable(state.config);
+  if (state.config.total > top) state.config.total = top;
   applyConfig(); save(); render();
+}
+// Shown below the total card when the requested total cannot be spent.
+function totalErrorView() {
+  const c = state.config, req = totalError, top = maxSpendable(c);
+  const need = Math.ceil(req / NAMES.length);
+  const raise = need <= 10
+    ? `<button data-fix="max">Raise the maximum per product to ${need}</button>`
+    : `<span>Even the highest maximum per product (10) allows only ${NAMES.length * 10} votes in total.</span>`;
+  return `<div class="errbox" role="alert">
+    <div class="errtitle">A total of ${req} votes is too high.</div>
+    <div>A voter can spend at most ${top} votes: ${NAMES.length} products with up to ${c.max === 1 ? "1 vote" : c.max + " votes"} each.</div>
+    <div class="errfix">To fix this, either:</div>
+    <div class="errbtns"><button data-fix="total">Lower the total to ${top}</button>${raise}</div></div>`;
 }
 function validName(name, except) {
   name = name.trim();
@@ -106,7 +123,17 @@ function bindSetup() {
     inp.dispatchEvent(new Event("change"));
   });
   if ($("maxVotes")) $("maxVotes").onchange = e => { state.config.max = clamp(e.target.value, 1, 10, 3); saveConfig(); };
-  if ($("totalVotes")) $("totalVotes").onchange = e => { state.config.total = clamp(e.target.value, 1, 500, NAMES.length); saveConfig(); };
+  if ($("totalVotes")) $("totalVotes").onchange = e => {
+    const req = Math.max(1, Math.round(+e.target.value) || NAMES.length);
+    if (req > maxSpendable(state.config)) saveConfig("", req);
+    else { state.config.total = req; saveConfig(); }
+  };
+  document.querySelectorAll("[data-fix]").forEach(b => b.onclick = () => {
+    const c = state.config, req = totalError;
+    if (b.dataset.fix === "max") { c.max = Math.ceil(req / NAMES.length); c.total = req; }
+    else c.total = maxSpendable(c);
+    saveConfig();
+  });
   if ($("doneBtn")) $("doneBtn").onclick = () => $("setupBtn").click();
   if ($("resetDefaults")) $("resetDefaults").onclick = async () => { if (await confirmDialog("Restore the default products and limits?", "Restore defaults")) { state.config = defaultConfig(); saveConfig(); } };
 }
