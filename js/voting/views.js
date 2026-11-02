@@ -30,11 +30,11 @@ function votingView() {
       const tone = v ? "border-blue-600 ring-1 ring-blue-600 bg-blue-50 dark:bg-gray-700" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800";
       return `<div class="p-3 border rounded-lg shadow-sm flex items-center gap-3 cursor-pointer select-none ${tone}" data-tile="${esc(name)}"><div class="${ICONBOX}">${ICON[name]}</div>
         <div class="flex-1 min-w-0"><div class="font-medium truncate">${esc(name)}</div>
-          <div class="flex gap-1 mt-1.5">${Array.from({ length: maxFor(name) }, (_, i) => i + 1).map(n => `<div class="w-3 h-3 rounded-full ${n <= v ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"}"></div>`).join("")}</div></div>
+          <div class="flex items-center gap-1 mt-1.5">${Array.from({ length: maxFor(name) }, (_, i) => i + 1).map(n => `<div class="w-3 h-3 rounded-full ${n <= v ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"}"></div>`).join("")}<span class="maxnote hidden ml-1 text-xs font-medium text-red-600 dark:text-red-400">Maximum reached</span></div></div>
         <div class="flex items-center gap-2 shrink-0">
           <button class="${BTN_ROUND}" data-vote="${esc(name)}" data-d="-1" ${v === 0 ? "disabled" : ""} aria-label="Remove a vote from ${esc(name)}">−</button>
           <span class="w-5 text-center font-bold tabular-nums">${v}</span>
-          <button class="${BTN_ROUND} ${left === 0 ? "opacity-40" : ""}" data-vote="${esc(name)}" data-d="1" ${v >= maxFor(name) ? "disabled" : ""} aria-label="Add a vote to ${esc(name)}">+</button>
+          <button class="${BTN_ROUND} ${left === 0 || v >= maxFor(name) ? "opacity-40" : ""}" data-vote="${esc(name)}" data-d="1" ${v >= maxFor(name) ? 'aria-disabled="true"' : ""} aria-label="Add a vote to ${esc(name)}">+</button>
         </div></div>`;
     }).join("")}</div>
     <div class="${BAR}">
