@@ -10,7 +10,7 @@ This repository holds early prototypes. There is no build step, backend, or logi
 | --- | --- | --- |
 | Entry page | `index.html` | Lists every tool as a card, available or coming soon. |
 | Retro board | `retro.html` | A static mockup in the style of EasyRetro. |
-| Purchase voting | `voting.html`, `js/voting/` | Vanilla JavaScript. Saves to the browser's `localStorage`. |
+| Dot voting | `voting.html`, `js/voting/` | Vanilla JavaScript. Saves to the browser's `localStorage`. |
 
 Shared code: `js/site.js` holds the tool list and the header used by every page, and `css/app.css` holds the few styles Tailwind cannot express. All pages load Tailwind from a CDN.
 

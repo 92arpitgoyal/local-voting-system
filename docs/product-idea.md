@@ -62,7 +62,7 @@ Each utility ends by offering to save its result into a core tool. For example, 
 ## Existing prototypes
 
 - **Retro board:** an EasyRetro-style board where a team adds cards, votes, and records action items. It maps to capture.
-- **Purchase voting:** each voter spreads a limited number of votes across products, then combined results are shown. It could become a free utility or part of the decision log.
+- **Dot voting:** each voter spreads a limited number of votes across products, then combined results are shown. It could become a free utility or part of the decision log.
 
 ## Problem and audience
 

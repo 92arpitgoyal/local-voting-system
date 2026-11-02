@@ -7,7 +7,7 @@ const SITE_LOGO = '<svg class="w-7 h-7" viewBox="0 0 28 28" fill="none" stroke-l
 const TOOLS = [
   { name: "Retro board", href: "retro.html", kind: "Capture", text: "Collect what went well and what to improve, vote on cards, and turn them into action items.",
     tone: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300", icon: '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/>' },
-  { name: "Purchase voting", href: "voting.html", kind: "Decide", text: "Let every person spread a limited number of votes across products and see the combined ranking.",
+  { name: "Dot voting", href: "voting.html", kind: "Decide", text: "Let every person spread a limited number of votes across products and see the combined ranking.",
     tone: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300", icon: '<path d="M5 13l4 4L19 7"/><rect x="3" y="3" width="18" height="18" rx="3"/>' },
   { name: "Decision log", kind: "Decide", text: "Record what was decided and why.",
     tone: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300", icon: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h8"/>' },
@@ -33,5 +33,5 @@ const toolIcon = t => `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stro
   host.className = "bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700";
   host.innerHTML = `<div class="max-w-screen-xl mx-auto flex items-center gap-2 px-4 py-3">
     <a href="index.html" class="flex items-center gap-2 text-xl font-semibold mr-3 shrink-0">${SITE_LOGO}<span>Team<span class="text-[#534AB7] dark:text-[#AFA9EC]">-Echo</span></span></a>
-    <nav aria-label="Tools" class="flex items-center gap-1 overflow-x-auto">${links}</nav></div>`;
+    <nav aria-label="Tools" class="ml-auto flex items-center gap-1 overflow-x-auto">${links}</nav></div>`;
 })();
