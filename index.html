@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase Voting</title>
+<style>
+  :root {
+    --bg: #f4f3fb; --card: #ffffff; --text: #1e1b3a; --muted: #6e6b8a; --line: #e6e4f3;
+    --accent: #5b4bdb; --accent2: #8b5cf6; --accent-soft: #ebe8ff; --accent-text: #ffffff;
+    --warn: #d6453d;
+    --shadow: 0 1px 2px rgba(40,30,100,.06), 0 6px 20px rgba(40,30,100,.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121122; --card: #1c1b32; --text: #efedff; --muted: #9a97bd; --line: #2d2b4a;
+      --accent: #8f82ff; --accent2: #b18cff; --accent-soft: #2a2655; --accent-text: #12102a;
+      --warn: #ff8a82; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; padding: 28px 16px 56px; }
+  header .in { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; letter-spacing: -.02em; }
+  header p { margin: 0; opacity: .88; }
+  main { max-width: 820px; margin: -34px auto 0; padding: 0 16px 80px; }
+  h2 { font-size: 1.2rem; margin: 30px 0 12px; letter-spacing: -.01em; }
+  #app > h2:first-child { margin-top: 52px; }
+  .card { background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .card h3 { margin: 0 0 10px; font-size: 1.05rem; }
+  .muted { color: var(--muted); }
+  .warn { color: var(--warn); }
+
+  button { font: inherit; font-weight: 600; cursor: pointer; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 10px 18px; transition: transform .08s, box-shadow .15s, opacity .15s; }
+  button:hover:not(:disabled) { box-shadow: var(--shadow); }
+  button:active:not(:disabled) { transform: scale(.97); }
+  button.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: 0; }
+  button:disabled { opacity: .35; cursor: not-allowed; }
+  input[type=text] { font: inherit; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: var(--text); min-width: 0; flex: 1; outline: none; }
+  input[type=text]:focus { border-color: var(--accent); }
+  .row.bar { position: sticky; bottom: 0; z-index: 5; margin: 20px -16px 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--bg) 70%, transparent); flex-wrap: nowrap; }
+  .bar button { box-shadow: var(--shadow); }
+  .order { margin-bottom: 12px; }
+  .order button { display: inline-flex; align-items: center; gap: 6px; }
+  .bico { width: 16px; height: 16px; }
+  .order button { padding: 6px 12px; font-size: .9rem; border-radius: 999px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .between { justify-content: space-between; }
+
+  .voter { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .voter:first-of-type { border-top: 0; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; flex: none; }
+  .grow { flex: 1; min-width: 0; }
+
+  .budget { position: sticky; top: 12px; z-index: 5; background: var(--card); border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .budget.shake { animation: shake .45s; }
+  .budget.shake .left { color: var(--warn); }
+  @keyframes shake { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(6px); } 30%, 50%, 70% { transform: translateX(-9px); } 40%, 60% { transform: translateX(9px); } }
+  .stepper button.dim { opacity: .35; }
+  .meter { height: 10px; border-radius: 6px; background: var(--accent-soft); overflow: hidden; margin-top: 10px; }
+  .meter > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .2s; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+  .tile { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; background: var(--card); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; border: 2px solid transparent; transition: border-color .15s; }
+  .tile.on { border-color: var(--accent); background: var(--accent-soft); }
+  .emoji { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+  .ico { width: 26px; height: 26px; display: block; }
+  .tile.on .emoji { background: var(--card); }
+  .name { font-weight: 600; }
+  .pips { display: flex; gap: 5px; margin-top: 6px; }
+  .pip { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+  .pip.f { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+  .stepper { display: flex; align-items: center; gap: 8px; flex: none; }
+  .stepper button { width: 38px; height: 38px; padding: 0; font-size: 1.25rem; border-radius: 50%; }
+  .stepper span { width: 20px; text-align: center; font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+
+  .podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .place { background: var(--card); border-radius: 16px; padding: 16px 8px; text-align: center; box-shadow: var(--shadow); border: 2px solid transparent; }
+  .place.p1 { border-color: var(--accent); background: var(--accent-soft); }
+  .place.p1 .emoji { background: var(--card); }
+  .place.p1 .medal { color: var(--accent); }
+  .place .emoji { margin: 8px auto; width: 54px; height: 54px; }
+  .place .ico { width: 30px; height: 30px; }
+  .place .score { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+  .place .medal { font-size: .85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+  .result { display: grid; grid-template-columns: 26px 36px 1fr 36px; gap: 10px; align-items: center; padding: 7px 0; }
+  .result .rank { color: var(--muted); font-weight: 600; text-align: center; }
+  .track { background: var(--accent-soft); border-radius: 6px; height: 9px; overflow: hidden; margin-top: 4px; }
+  .fill { background: linear-gradient(90deg, var(--accent), var(--accent2)); height: 100%; }
+  .num { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .chip .ico { width: 16px; height: 16px; }
+  .chip { display: inline-flex; gap: 6px; align-items: center; background: var(--accent-soft); border-radius: 999px; padding: 4px 12px; margin: 4px 6px 0 0; font-size: .92rem; }
+  .chip b { color: var(--accent); }
+
+  .scroll { overflow-x: auto; }
+  tr.toggle td { text-align: left; font-weight: 600; cursor: pointer; background: var(--accent-soft); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  th:first-child, td:first-child { text-align: left; }
+  td.zero { color: var(--muted); opacity: .5; }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Purchase Voting</h1>
+  <p id="sub"></p>
+</div></header>
+<main id="app"></main>
+
+<script>
+const PATHS = {
+  "Dishwasher": '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 8h16"/><circle cx="12" cy="14.5" r="3.8"/><path d="M7 5.5h.01"/>',
+  "Car": '<path d="M3 13l2-5h14l2 5v5H3z"/><path d="M3 13h18"/><circle cx="7.5" cy="16" r=".9"/><circle cx="16.5" cy="16" r=".9"/><path d="M5 18v2M19 18v2"/>',
+  "Scooty": '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l2-10M15 7h3"/>',
+  "Mobile": '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  "Work Chair": '<rect x="8" y="3" width="8" height="8" rx="1.5"/><path d="M6 14h12M12 14v5M8 21h8"/>',
+  "Work Table": '<path d="M3 9h18M5 9v11M19 9v11M9 9v5h6V9"/>',
+  "TV": '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  "TV Speakers": '<rect x="2" y="8" width="20" height="8" rx="2"/><circle cx="6.5" cy="12" r="1.3"/><circle cx="17.5" cy="12" r="1.3"/><path d="M10 12h4"/>',
+  "AC": '<rect x="3" y="4" width="18" height="9" rx="2"/><path d="M6 9h12M8 17v3M12 17v4M16 17v3"/>',
+  "New PS": '<path d="M7 8h10a4 4 0 0 1 4 4v2a3 3 0 0 1-5.2 2L14.5 15h-5l-1.3 1A3 3 0 0 1 3 14v-2a4 4 0 0 1 4-4z"/><path d="M8 10v3M6.5 11.5h3"/><circle cx="16" cy="11" r=".6"/><circle cx="18" cy="12.5" r=".6"/>',
+  "Camera": '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/>',
+  "Sofa": '<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M5 18v2M19 18v2"/>',
+  "Mattress": '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/>',
+  "Electric Scrubber": '<rect x="4" y="13" width="13" height="5" rx="1.5"/><path d="M11 13l3-9h3M7 18v2M10.5 18v2M14 18v2"/>',
+  "Pressure Washer": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5a2.7 2.7 0 0 0 2.5 2.5"/>',
+  "Electric Screwdriver": '<rect x="3" y="7" width="13" height="5" rx="1.5"/><path d="M7 12l-1 8h4l1-8M16 9.5h5"/>',
+  "Mixer-Grinder": '<path d="M6 3h12M7 3l1.5 11h7L17 3"/><path d="M4 14h16v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="12" cy="17.5" r="1.2"/>',
+  "Vinyl Player": '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="10.5" cy="12" r="4.5"/><circle cx="10.5" cy="12" r=".8"/><path d="M19 6l-3 7"/>',
+  "Marshall Speaker": '<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="15" r="4"/><circle cx="12" cy="15" r="1"/><circle cx="12" cy="6.5" r="1.2"/>',
+  "3D Printer": '<path d="M4 3v18M20 3v18M4 4h16"/><rect x="10" y="4" width="4" height="4"/><rect x="9" y="15" width="6" height="4"/>'
+};
+const NAMES = Object.keys(PATHS);
+const ICON = Object.fromEntries(NAMES.map(n => [n, `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[n]}</svg>`]));
+const PRODUCTS = NAMES;
+const MAX_PER_PRODUCT = 3;
+const TOTAL_CAP = PRODUCTS.length;
+const KEY = "purchase-voting-v1";
+const COLORS = ["#5b4bdb","#e0527a","#1f9d8b","#e08a1e","#3b82c4","#a855c7","#6a994e","#d6453d"];
+
+const RENAMED = {"Scooter": "Scooty", "Cell Phone": "Mobile", "Office Chair": "Work Chair", "Desk": "Work Table", "Air Conditioner": "AC", "New PlayStation": "New PS", "Couch": "Sofa", "Cordless Screwdriver": "Electric Screwdriver", "Blender": "Mixer-Grinder", "Record Player": "Vinyl Player"};
+let showUnvoted = false;
+let state = load();
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.players)) {
+      const fix = v => v && Object.fromEntries(Object.entries(v).map(([k, n]) => [RENAMED[k] || k, n]));
+      s.players.forEach(p => p.votes = fix(p.votes));
+      if (s.draft) s.draft.votes = fix(s.draft.votes);
+      return { players: s.players, draft: s.draft || null, finished: !!s.finished };
+    }
+  } catch (e) {}
+  return { players: [], draft: null, finished: false };
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+const used = p => Object.values(p.votes).reduce((a, b) => a + b, 0);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const avatar = (name, i) => `<div class="avatar" style="background:${COLORS[i % COLORS.length]}">${esc(name.trim()[0].toUpperCase())}</div>`;
+
+function startVoter(name) {
+  name = name.trim();
+  if (!name) return;
+  state.draft = { name, votes: {}, order: shuffled() };
+  save(); render(); window.scrollTo(0, 0);
+}
+function shuffled() {
+  const a = NAMES.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function setOrder(kind) {
+  state.draft.order = kind === "alpha" ? NAMES.slice().sort((a, b) => a.localeCompare(b)) : shuffled();
+  save(); render();
+}
+function vote(product, delta) {
+  const d = state.draft;
+  const cur = d.votes[product] || 0;
+  const next = cur + delta;
+  if (next < 0 || next > MAX_PER_PRODUCT) return;
+  if (delta > 0 && used(d) >= TOTAL_CAP) { shakeBudget(); return; }
+  if (next === 0) delete d.votes[product]; else d.votes[product] = next;
+  save();
+  const y = window.scrollY;
+  render(); window.scrollTo(0, y);
+}
+function shakeBudget() {
+  const el = document.querySelector(".budget");
+  if (!el) return;
+  el.classList.remove("shake");
+  void el.offsetWidth;
+  el.classList.add("shake");
+  try { navigator.vibrate && navigator.vibrate(200); } catch (e) {}
+}
+function submitVotes() {
+  const d = state.draft;
+  if (!confirm("Submit votes for " + d.name + "? They cannot be changed afterwards.")) return;
+  state.players.push({ id: Date.now() + Math.random().toString(36).slice(2, 6), name: d.name, votes: d.votes });
+  state.draft = null;
+  save(); render(); window.scrollTo(0, 0);
+}
+function cancelVoter() {
+  if (!confirm("Discard the votes entered so far for " + state.draft.name + "?")) return;
+  state.draft = null;
+  save(); render();
+}
+function resetAll() {
+  if (!confirm("Delete all submitted votes and start over?")) return;
+  state = { players: [], draft: null, finished: false };
+  save(); render();
+}
+
+function render() {
+  document.getElementById("sub").textContent = state.finished
+    ? `Final results from ${state.players.length} ${state.players.length === 1 ? "voter" : "voters"}, with combined totals first and then each voter's choices.`
+    : `Give each product 0 to ${MAX_PER_PRODUCT} votes, with ${TOTAL_CAP} votes to spend in total.`;
+  document.getElementById("app").innerHTML = state.finished ? resultsView() : state.draft ? votingView() : homeView();
+  bind();
+}
+
+function homeView() {
+  return `<div class="card">
+    <h3>Next voter</h3>
+    <div class="row"><input type="text" id="newName" placeholder="Enter your name" maxlength="30">
+    <button class="primary" id="startBtn">Start voting</button></div>
+  </div>
+  <div class="card"><h3>Submitted voters (${state.players.length})</h3>
+    ${state.players.map((p, i) => `<div class="voter">${avatar(p.name, i)}<div class="grow"><b>${esc(p.name)}</b></div><span class="muted">${used(p)} of ${TOTAL_CAP} votes used</span></div>`).join("")
+      || '<div class="muted">No votes have been submitted yet.</div>'}
+  </div>
+  <div class="row between bar">
+    <button id="resetBtn">Start over</button>
+    <button class="primary" id="finishBtn" ${state.players.length ? "" : "disabled"}>Finish and show results</button></div>`;
+}
+
+function votingView() {
+  const d = state.draft;
+  const spent = used(d), left = TOTAL_CAP - spent;
+  return `<div class="budget">
+      <div class="row between"><span>Voting as <b>${esc(d.name)}</b></span>
+      <span class="left"><b class="${left === 0 ? "warn" : ""}">${left}</b> of ${TOTAL_CAP} votes left</span></div>
+      <div class="meter"><div style="width:${spent / TOTAL_CAP * 100}%"></div></div></div>
+    <div class="row order"><span class="muted">Order:</span><button id="shuffleBtn"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Random order</button><button id="alphaBtn" aria-label="Sort alphabetically, A to Z">A <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Z</button></div>
+    <div class="grid">${(d.order && d.order.length === NAMES.length ? d.order : NAMES).map(name => {
+      const v = d.votes[name] || 0;
+      return `<div class="tile ${v ? "on" : ""}" data-tile="${esc(name)}"><div class="emoji">${ICON[name]}</div>
+        <div class="grow"><div class="name">${esc(name)}</div>
+          <div class="pips">${[1, 2, 3].map(n => `<div class="pip ${n <= v ? "f" : ""}"></div>`).join("")}</div></div>
+        <div class="stepper">
+          <button data-vote="${esc(name)}" data-d="-1" ${v === 0 ? "disabled" : ""} aria-label="Remove a vote from ${esc(name)}">−</button>
+          <span>${v}</span>
+          <button data-vote="${esc(name)}" data-d="1" ${v >= MAX_PER_PRODUCT ? "disabled" : ""} class="${left === 0 ? "dim" : ""}" aria-label="Add a vote to ${esc(name)}">+</button>
+        </div></div>`;
+    }).join("")}</div>
+    <div class="row between bar">
+      <button id="cancelBtn">Discard and go back</button>
+      <button class="primary" id="submitBtn">Submit my votes</button></div>`;
+}
+
+function resultsView() {
+  const totals = NAMES.map(name => ({ name, total: state.players.reduce((a, p) => a + (p.votes[name] || 0), 0) }))
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  const max = Math.max(1, ...totals[0] ? [totals[0].total] : [1]);
+  const medals = ["1st", "2nd", "3rd"];
+
+  const voted = totals.filter(t => t.total > 0), unvoted = totals.filter(t => !t.total);
+  const top = voted.slice(0, 3);
+  let h = `<h2>Combined results</h2>`;
+  if (!top.length) h += `<div class="card muted">No votes were cast.</div>`;
+  else h += `<div class="podium">${top.map((t, k) => `
+    <div class="place p${k + 1}"><div class="medal">${medals[k]}</div><div class="emoji">${ICON[t.name]}</div>
+      <div class="name">${esc(t.name)}</div><div class="score">${t.total}</div></div>`).join("")}</div>`;
+
+  if (voted.length) h += `<div class="card">${voted.map((t, i) =>
+    `<div class="result"><span class="rank">${i + 1}</span><span class="emoji" style="width:34px;height:34px;border-radius:9px">${ICON[t.name]}</span>
+      <div>${esc(t.name)}<div class="track"><div class="fill" style="width:${t.total / max * 100}%"></div></div></div>
+      <span class="num">${t.total}</span></div>`).join("")}</div>`;
+
+
+  h += `<h2>Results by voter</h2>`;
+  h += state.players.map((p, i) => {
+    const picks = NAMES.filter(n => p.votes[n]).sort((a, b) => p.votes[b] - p.votes[a]);
+    return `<div class="card"><div class="voter" style="padding-top:0">${avatar(p.name, i)}
+      <div class="grow"><b>${esc(p.name)}</b></div><span class="muted">${used(p)} of ${TOTAL_CAP} votes used</span></div>
+      ${picks.length ? picks.map(n => `<span class="chip">${ICON[n]} ${esc(n)} <b>${p.votes[n]}</b></span>`).join("") : '<div class="muted">No votes cast.</div>'}</div>`;
+  }).join("");
+
+  const row = t => `<tr><td>${esc(t.name)}</td>${state.players.map(p => { const v = p.votes[t.name] || 0; return `<td class="${v ? "" : "zero"}">${v}</td>`; }).join("")}<td><b>${t.total}</b></td></tr>`;
+  const cols = state.players.length + 2;
+  h += `<h2>Full table</h2><div class="card scroll"><table><thead><tr><th>Product</th>${state.players.map(p => `<th>${esc(p.name)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${
+    voted.map(row).join("")}${
+    unvoted.length ? `<tr class="toggle" id="toggleRow"><td colspan="${cols}">${showUnvoted ? "▾" : "▸"} Not voted for by anyone (${unvoted.length})</td></tr>${showUnvoted ? unvoted.map(row).join("") : ""}` : ""
+  }</tbody></table></div>`;
+
+  h += `<div class="row between bar">
+    <button id="backBtn">Back to voter list</button><button id="resetBtn">Start over</button></div>`;
+  return h;
+}
+
+function bind() {
+  const $ = id => document.getElementById(id);
+  const nameInput = $("newName");
+  if (nameInput) {
+    nameInput.addEventListener("keydown", e => { if (e.key === "Enter") startVoter(nameInput.value); });
+    $("startBtn").onclick = () => startVoter(nameInput.value);
+  }
+  document.querySelectorAll("[data-tile]").forEach(t => t.onclick = e => { if (!e.target.closest("button")) vote(t.dataset.tile, 1); });
+  document.querySelectorAll("[data-vote]").forEach(b => b.onclick = () => vote(b.dataset.vote, +b.dataset.d));
+  if ($("shuffleBtn")) $("shuffleBtn").onclick = () => setOrder("shuffle");
+  if ($("alphaBtn")) $("alphaBtn").onclick = () => setOrder("alpha");
+  if ($("submitBtn")) $("submitBtn").onclick = submitVotes;
+  if ($("cancelBtn")) $("cancelBtn").onclick = cancelVoter;
+  if ($("finishBtn")) $("finishBtn").onclick = () => { showUnvoted = false; state.finished = true; save(); render(); window.scrollTo(0, 0); };
+  if ($("backBtn")) $("backBtn").onclick = () => { state.finished = false; save(); render(); };
+  if ($("toggleRow")) $("toggleRow").onclick = () => { showUnvoted = !showUnvoted; const y = window.scrollY; render(); window.scrollTo(0, y); };
+  if ($("resetBtn")) $("resetBtn").onclick = resetAll;
+}
+
+render();
+</script>
+</body>
+</html>
