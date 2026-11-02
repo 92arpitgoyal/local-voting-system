@@ -52,11 +52,14 @@ function resultsView() {
   const top = voted.slice(0, 3);
   let h = `<h2 class="${H2} mt-0">Combined results</h2>`;
   if (!top.length) h += `<div class="${CARD} ${MUTED}">No votes were cast.</div>`;
-  else h += `<div class="grid grid-cols-3 gap-3 mb-4">${top.map((t, k) => `
-    <div class="p-3 text-center border rounded-lg shadow-sm ${k === 0 ? "border-blue-600 ring-1 ring-blue-600 bg-blue-50 dark:bg-gray-700" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"}">
-      <div class="text-xs font-semibold uppercase tracking-wide ${k === 0 ? "text-blue-700 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"}">${medals[k]}</div>
-      <div class="${ICONBOX} mx-auto my-2">${ICON[t.name]}</div>
-      <div class="font-medium text-sm truncate">${esc(t.name)}</div><div class="text-2xl font-extrabold text-blue-700 dark:text-blue-400">${t.total}</div></div>`).join("")}</div>`;
+  else h += `<div class="grid grid-cols-3 gap-3 mb-4">${top.map((t, k) => {
+    const glow = ["opacity-90 dark:opacity-90", "opacity-60 dark:opacity-65", "opacity-35 dark:opacity-40"][k];
+    return `
+    <div class="relative isolate overflow-hidden p-3 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+      <div aria-hidden="true" class="absolute inset-x-0 top-0 -z-10 blur-2xl"><div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="aspect-[1155/678] w-full bg-gradient-to-tr from-blue-300 to-blue-600 ${glow}"></div></div>
+      <div class="text-xs font-bold uppercase tracking-wide text-gray-900 dark:text-white">${medals[k]}</div>
+      <div class="w-10 h-10 rounded-lg bg-white text-blue-700 ring-1 ring-blue-200 shadow-sm dark:bg-gray-900 dark:text-blue-300 dark:ring-blue-800 flex items-center justify-center mx-auto my-2">${ICON[t.name]}</div>
+      <div class="font-semibold text-sm truncate text-gray-900 dark:text-white">${esc(t.name)}</div><div class="text-2xl font-extrabold text-gray-900 dark:text-white">${t.total}</div></div>`;}).join("")}</div>`;
 
   if (voted.length) h += `<div class="${CARD}">${voted.map((t, i) =>
     `<div class="grid grid-cols-[1.5rem_2.5rem_1fr_2rem] gap-2.5 items-center py-1.5"><span class="text-center font-medium ${MUTED}">${i + 1}</span><span class="${ICONBOX}">${ICON[t.name]}</span>
